@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>برنامج الباركود والفحص</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>window.jsPDF = window.jspdf.jsPDF;</script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      background: #f0fdf4;
+      color: #1e4620;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .section {
+      display: none;
+      text-align: center;
+    }
+
+    .home {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      height: 100vh;
+      text-align: center;
+    }
+
+    button {
+      background-color: #2d6a4f;
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    button:hover {
+      background-color: #1b4332;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], textarea, input[type="file"] {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    form {
+      max-width: 400px;
+      margin: auto;
+      text-align: right;
+    }
+
+    form label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .cards-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .card {
+      width: 280px;
+      background-color: #e6fffa;
+      border: 2px solid #95d5b2;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .card img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border: 1px solid #95d5b2;
+    }
+
+    .barcode {
+      width: 150px;
+      height: 150px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #95d5b2;
+      background: white;
+    }
+
+    @media print {
+      .home, .sectionSwitcher, button, h2, h3, form, .upload-section {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+      }
+      .card {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- الواجهة الرئيسية -->
+<div class="home" id="home">
+  <h2>مرحبا بك 👋</h2>
+  <button onclick="showSection('qrGenerator')">📎 توليد باركود من رابط</button>
+  <button onclick="showSection('safetyBadges')">🛠️ باجات الفحص والصيانة</button>
+</div>
+
+<!-- توليد باركود من رابط -->
+<div class="section" id="qrGenerator">
+  <button onclick="goHome()">⬅ العودة</button>
+  <h2>توليد باركود من رابط</h2>
+  <input type="text" id="linkInput" placeholder="أدخل الرابط هنا" />
+  <br><br>
+  <button onclick="generateQRCode()">📎 توليد الباركود</button>
+  <div id="qrcode" style="margin-top:20px;"></div>
+  <div id="downloadBtnContainer" style="margin-top:15px;"></div>
+</div>
+
+<!-- باجات الفحص -->
+<div class="section" id="safetyBadges">
+  <button onclick="goHome()">⬅ العودة</button>
+  <h2>بطاقات الفحص الطبي</h2>
+
+  <form id="dataForm" onsubmit="return false;">
+    <label>الاسم:</label><input type="text" id="name" required />
+    <label>نوع العمل:</label><input type="text" id="workType" />
+    <label>اسم الشركة:</label><input type="text" id="companyName" />
+    <label>العمر:</label><input type="number" id="age" />
+    <label>نوع الفحص:</label><input type="text" id="checkupType" />
+    <label>تاريخ الفحص الطبي:</label><input type="date" id="checkupDate" />
+    <label>تاريخ تدريب السلامة:</label><input type="date" id="safetyDate" />
+    <label>المهنة:</label><input type="text" id="jobTitle" />
+    <label>رقم القفل:</label><input type="text" id="lockNumber" />
+    <label>رفع صورة:</label>
+    <input type="file" id="imageInput" accept="image/*" />
+    <label>رابط الصورة (Base64):</label>
+    <textarea id="base64Output" readonly placeholder="سيظهر رابط الصورة هنا"></textarea>
+    <button type="button" onclick="copyBase64()">نسخ الرابط</button>
+    <button type="button" onclick="generateCard()">إضافة بطاقة</button>
+  </form>
+
+  <h3>رفع ملف Excel:</h3>
+  <input type="file" id="excelFile" accept=".xlsx" />
+
+  <h3>البطاقات</h3>
+  <button onclick="printAll()">🖨️ طباعة الكل</button>
+  <div class="cards-container" id="cardsContainer"></div>
+</div>
+
+<script>
+  const expiryDate = new Date("2025-08-01");
+
+  function showSection(sectionId) {
+    document.getElementById("home").style.display = "none";
+    document.querySelectorAll(".section").forEach(sec => sec.style.display = "none");
+    document.getElementById(sectionId).style.display = "block";
+  }
+
+  function goHome() {
+    document.getElementById("home").style.display = "flex";
+    document.querySelectorAll(".section").forEach(sec => sec.style.display = "none");
+  }
+
+  function generateQRCode() {
+    const link = document.getElementById("linkInput").value.trim();
+    const qrcodeContainer = document.getElementById("qrcode");
+    const downloadBtnContainer = document.getElementById("downloadBtnContainer");
+
+    qrcodeContainer.innerHTML = "";
+    downloadBtnContainer.innerHTML = "";
+
+    if (!link) {
+      alert("يرجى إدخال رابط");
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+
+    QRCode.toCanvas(canvas, link, { width: 200, height: 200 }, function (error) {
+      if (error) {
+        alert("حدث خطأ أثناء توليد الباركود");
+        return;
+      }
+
+      qrcodeContainer.appendChild(canvas);
+
+      const downloadBtn = document.createElement("button");
+      downloadBtn.textContent = "📄 تنزيل PDF";
+      downloadBtn.onclick = () => {
+        const pdf = new jsPDF();
+        pdf.text("الباركود", 80, 20);
+        const imgData = canvas.toDataURL("image/png");
+        pdf.addImage(imgData, "PNG", 40, 30, 120, 120);
+        pdf.save("barcode.pdf");
+      };
+      downloadBtnContainer.appendChild(downloadBtn);
+    });
+  }
+
+  function copyBase64() {
+    const textarea = document.getElementById("base64Output");
+    textarea.select();
+    document.execCommand("copy");
+    alert("تم نسخ الرابط");
+  }
+
+  document.getElementById("imageInput").addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        img.onload = function () {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          canvas.width = 150;
+          canvas.height = 150;
+          ctx.drawImage(img, 0, 0, 150, 150);
+          const base64 = canvas.toDataURL("image/jpeg", 0.7);
+          document.getElementById("base64Output").value = base64;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  function buildArabicQR(data) {
+    return `🔹 الاسم: ${data.name}
+🔹 نوع العمل: ${data.workType}
+🔹 اسم الشركة: ${data.companyName}
+🔹 العمر: ${data.age}
+🔹 نوع الفحص: ${data.checkupType}
+🔹 تاريخ الفحص الطبي: ${data.checkupDate || "غير محدد"}
+🔹 تاريخ تدريب السلامة: ${data.safetyDate || "غير محدد"}
+🔹 المهنة: ${data.jobTitle}
+🔹 رقم القفل: ${data.lockNumber}
+🔹 تاريخ الانتهاء: 2025-08-01;`;
+  }
+
+  function generateCard(dataFromExcel = null) {
+    const now = new Date();
+    const expired = now >= expiryDate;
+    let data = {};
+
+    if (dataFromExcel) {
+      data = dataFromExcel;
+    } else {
+      data = {
+        name: document.getElementById("name").value.trim(),
+        workType: document.getElementById("workType").value.trim(),
+        companyName: document.getElementById("companyName").value.trim(),
+        age: document.getElementById("age").value.trim(),
+        checkupType: document.getElementById("checkupType").value.trim(),
+        checkupDate: document.getElementById("checkupDate").value.trim(),
+        safetyDate: document.getElementById("safetyDate").value.trim(),
+        jobTitle: document.getElementById("jobTitle").value.trim(),
+        lockNumber: document.getElementById("lockNumber").value.trim(),
+        imageBase64: document.getElementById("base64Output").value.trim()
+      };
+    }
+
+    if (!data.name) return alert("يرجى إدخال الاسم");
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const nameEl = document.createElement("h4");
+    nameEl.innerText = data.name;
+    card.appendChild(nameEl);
+
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "row";
+
+    const img = document.createElement("img");
+    img.src = data.imageBase64 || "";
+    rowDiv.appendChild(img);
+
+    const qrDiv = document.createElement("div");
+    qrDiv.className = "barcode";
+
+    const qrCanvas = document.createElement("canvas");
+
+    if (!expired) {
+      const textQR = buildArabicQR(data);
+      QRCode.toCanvas(qrCanvas, textQR, { width: 150, margin: 3 }, function (error) {
+        if (error) {
+          console.error("خطأ في توليد الباركود:", error);
+          qrDiv.innerHTML = "<b style='color:red'>خطأ في توليد الباركود</b>";
+        }
+      });
+      qrDiv.appendChild(qrCanvas);
+    } else {
+      qrDiv.innerHTML = "<b style='color:red'>انتهت صلاحية الباركود</b>";
+    }
+
+    rowDiv.appendChild(qrDiv);
+    card.appendChild(rowDiv);
+
+    const btnPrint = document.createElement("button");
+    btnPrint.textContent = "🖨️ طباعة";
+    btnPrint.onclick = () => window.print();
+    card.appendChild(btnPrint);
+
+    document.getElementById("cardsContainer").appendChild(card);
+  }
+
+  document.getElementById("excelFile").addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return alert("اختر ملف Excel");
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { raw: false });
+      rows.forEach(row => {
+        const data = {
+          name: row["الاسم"] || "",
+          workType: row["نوع العمل"] || "",
+          companyName: row["اسم الشركة"] || "",
+          age: row["العمر"] || "",
+          checkupType: row["نوع الفحص"] || "",
+          checkupDate: row["تاريخ الفحص الطبي"] || "",
+          safetyDate: row["تاريخ تدريب السلامة"] || "",
+          jobTitle: row["المهنة"] || "",
+          lockNumber: row["رقم القفل"] || "",
+          imageBase64: row["الصورة"] || ""
+        };
+        generateCard(data);
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  function printAll() {
+    window.print();
+  }
+</script>
+
+</body>
+</html>
