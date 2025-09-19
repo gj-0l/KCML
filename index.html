@@ -10,186 +10,159 @@
   <script>window.jsPDF = window.jspdf.jsPDF;</script>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      direction: rtl;
-      background: #f0fdf4;
-      color: #1e4620;
-      margin: 0;
-      padding: 20px;
-    }
-
-    .section {
-      display: none;
-      text-align: center;
-    }
-
-    .home {
+      background: linear-gradient(to right, #e0f7ec, #a8e6cf);
+      min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      gap: 20px;
-      height: 100vh;
+      align-items: flex-start;
+      direction: rtl;
+      padding: 30px;
+      font-family: Tahoma, Arial, sans-serif;
+    }
+    .container {
+      background: #fff;
+      margin: 120px;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 500px;
       text-align: center;
     }
-
+    .container img {
+      display: block;
+      margin: 0 auto 15px;
+      width: 300px;
+      height: 300px;
+    }
+    .title {
+      color:#0A6E75;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 25px;
+    }
+    .section { display: none; }
+    .home h2 { margin-bottom: 20px; color:#333; }
     button {
       background-color: #2d6a4f;
       color: white;
       border: none;
-      padding: 15px 25px;
+      padding: 12px 20px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 18px;
-    }
-
-    button:hover {
-      background-color: #1b4332;
-    }
-
-    input[type="text"], input[type="number"], input[type="date"], textarea, input[type="file"] {
+      font-size: 16px;
+      margin: 8px 0;
       width: 100%;
-      max-width: 400px;
+      transition: background 0.3s;
+    }
+    button:hover { background-color: #1b4332; }
+    input, textarea {
+      width: 100%;
+      margin-top: 8px;
       padding: 10px;
-      margin-top: 5px;
-      border-radius: 8px;
       border: 1px solid #ccc;
-      font-size: 14px;
+      border-radius: 6px;
       box-sizing: border-box;
+      font-size: 14px;
     }
+    form { text-align: right; }
+    form label { display: block; margin-top: 12px; font-weight: bold; }
+    .cards-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 15px; }
 
-    form {
-      max-width: 400px;
-      margin: auto;
-      text-align: right;
-    }
-
-    form label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-
-    .cards-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-    }
-
+    /* تعديل تصميم البطاقات */
     .card {
-      width: 280px;
+      width: 250px;
       background-color: #e6fffa;
       border: 2px solid #95d5b2;
       border-radius: 12px;
-      padding: 15px;
+      padding: 12px;
       text-align: center;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-
-    .row {
+    .card h4 { margin-bottom: 10px; color: #0A6E75; }
+    .card .content-row {
       display: flex;
       justify-content: space-around;
-      align-items: center;
-      margin-top: 10px;
       width: 100%;
+      margin-bottom: 10px;
     }
-
-    .card img {
-      width: 150px;
-      height: 150px;
+    .card .content-row img, .card .content-row .barcode {
+      width: 120px;
+      height: 120px;
+      border: 1px solid #95d5b2;
       object-fit: cover;
-      border: 1px solid #95d5b2;
-    }
-
-    .barcode {
-      width: 150px;
-      height: 150px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border: 1px solid #95d5b2;
       background: white;
     }
-
     @media print {
-      .home, .sectionSwitcher, button, h2, h3, form, .upload-section {
-        display: none !important;
-      }
-      body {
-        background: white !important;
-      }
-      .card {
-        page-break-inside: avoid;
-      }
+      button, form, h2, h3, .home { display: none !important; }
+      body { background: white !important; }
+      .card { page-break-inside: avoid; }
     }
   </style>
 </head>
 <body>
+<div class="container">
+  <img src="kcml.PNG" alt="شعار الشركة">
+  <h2 class="title">Welcome to the Digitalization World</h2>
 
-<!-- الواجهة الرئيسية -->
-<div class="home" id="home">
-  <h2>مرحبا بك 👋</h2>
-  <button onclick="showSection('qrGenerator')">📎 توليد باركود من رابط</button>
-  <button onclick="showSection('safetyBadges')">🛠️ باجات الفحص والصيانة</button>
-</div>
+  <div class="home" id="home">
+    <button onclick="showSection('qrGenerator')"> توليد باركود من رابط</button>
+    <button onclick="showSection('safetyBadges')"> باجات الفحص والصيانة</button>
+  </div>
 
-<!-- توليد باركود من رابط -->
-<div class="section" id="qrGenerator">
-  <button onclick="goHome()">⬅ العودة</button>
-  <h2>توليد باركود من رابط</h2>
-  <input type="text" id="linkInput" placeholder="أدخل الرابط هنا" />
-  <br><br>
-  <button onclick="generateQRCode()">📎 توليد الباركود</button>
-  <div id="qrcode" style="margin-top:20px;"></div>
-  <div id="downloadBtnContainer" style="margin-top:15px;"></div>
-</div>
+  <div class="section" id="qrGenerator">
+    <button onclick="goHome()">⬅ العودة</button>
+    <h2>توليد باركود من رابط</h2>
+    <input type="text" id="linkInput" placeholder="أدخل الرابط هنا" />
+    <button onclick="generateQRCode()"> توليد الباركود</button>
+    <div id="qrcode" style="margin-top:15px;"></div>
+    <div id="downloadBtnContainer" style="margin-top:10px;"></div>
+  </div>
 
-<!-- باجات الفحص -->
-<div class="section" id="safetyBadges">
-  <button onclick="goHome()">⬅ العودة</button>
-  <h2>بطاقات الفحص الطبي</h2>
+  <div class="section" id="safetyBadges">
+    <button onclick="goHome()">⬅ العودة</button>
+    <h2>بطاقات الفحص الطبي</h2>
 
-  <form id="dataForm" onsubmit="return false;">
-    <label>الاسم:</label><input type="text" id="name" required />
-    <label>نوع العمل:</label><input type="text" id="workType" />
-    <label>اسم الشركة:</label><input type="text" id="companyName" />
-    <label>العمر:</label><input type="number" id="age" />
-    <label>نوع الفحص:</label><input type="text" id="checkupType" />
-    <label>تاريخ الفحص الطبي:</label><input type="date" id="checkupDate" />
-    <label>تاريخ تدريب السلامة:</label><input type="date" id="safetyDate" />
-    <label>المهنة:</label><input type="text" id="jobTitle" />
-    <label>رقم القفل:</label><input type="text" id="lockNumber" />
-    <label>رفع صورة:</label>
-    <input type="file" id="imageInput" accept="image/*" />
-    <label>رابط الصورة (Base64):</label>
-    <textarea id="base64Output" readonly placeholder="سيظهر رابط الصورة هنا"></textarea>
-    <button type="button" onclick="copyBase64()">نسخ الرابط</button>
-    <button type="button" onclick="generateCard()">إضافة بطاقة</button>
-  </form>
+    <form id="dataForm" onsubmit="return false;">
+      <label>الاسم:</label><input type="text" id="name" required />
+      <label>نوع العمل:</label><input type="text" id="workType" />
+      <label>اسم الشركة:</label><input type="text" id="companyName" />
+      <label>العمر:</label><input type="number" id="age" />
+      <label>نوع الفحص:</label><input type="text" id="checkupType" />
+      <label>تاريخ الفحص الطبي:</label><input type="date" id="checkupDate" />
+      <label>تاريخ تدريب السلامة:</label><input type="date" id="safetyDate" />
+      <label>المهنة:</label><input type="text" id="jobTitle" />
+      <label>رقم القفل:</label><input type="text" id="lockNumber" />
+      <label>رفع صورة:</label>
+      <input type="file" id="imageInput" accept="image/*" />
+      <label>رابط الصورة (Base64):</label>
+      <textarea id="base64Output" readonly placeholder="سيظهر رابط الصورة هنا"></textarea>
+      <button type="button" onclick="copyBase64()">نسخ الرابط</button>
+      <button type="button" onclick="generateCard()">إضافة بطاقة</button>
+    </form>
 
-  <h3>رفع ملف Excel:</h3>
-  <input type="file" id="excelFile" accept=".xlsx" />
+    <h3>رفع ملف Excel:</h3>
+    <input type="file" id="excelFile" accept=".xlsx" />
 
-  <h3>البطاقات</h3>
-  <button onclick="printAll()">🖨️ طباعة الكل</button>
-  <div class="cards-container" id="cardsContainer"></div>
+    <h3>البطاقات</h3>
+    <button onclick="printAll()">🖨️ طباعة الكل</button>
+    <div class="cards-container" id="cardsContainer"></div>
+  </div>
 </div>
 
 <script>
-  const expiryDate = new Date("2025-09-01");
+  const expiryDate = new Date("2027-08-01");
 
   function showSection(sectionId) {
     document.getElementById("home").style.display = "none";
     document.querySelectorAll(".section").forEach(sec => sec.style.display = "none");
     document.getElementById(sectionId).style.display = "block";
   }
-
   function goHome() {
-    document.getElementById("home").style.display = "flex";
+    document.getElementById("home").style.display = "block";
     document.querySelectorAll(".section").forEach(sec => sec.style.display = "none");
   }
 
@@ -197,25 +170,13 @@
     const link = document.getElementById("linkInput").value.trim();
     const qrcodeContainer = document.getElementById("qrcode");
     const downloadBtnContainer = document.getElementById("downloadBtnContainer");
-
     qrcodeContainer.innerHTML = "";
     downloadBtnContainer.innerHTML = "";
-
-    if (!link) {
-      alert("يرجى إدخال رابط");
-      return;
-    }
-
+    if (!link) return alert("يرجى إدخال رابط");
     const canvas = document.createElement("canvas");
-
     QRCode.toCanvas(canvas, link, { width: 200, height: 200 }, function (error) {
-      if (error) {
-        alert("حدث خطأ أثناء توليد الباركود");
-        return;
-      }
-
+      if (error) return alert("خطأ أثناء توليد الباركود");
       qrcodeContainer.appendChild(canvas);
-
       const downloadBtn = document.createElement("button");
       downloadBtn.textContent = "📄 تنزيل PDF";
       downloadBtn.onclick = () => {
@@ -239,15 +200,15 @@
   document.getElementById("imageInput").addEventListener("change", function () {
     const file = this.files[0];
     if (file) {
-      const img = new Image();
       const reader = new FileReader();
       reader.onload = function (e) {
+        const img = new Image();
         img.onload = function () {
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
-          canvas.width = 150;
-          canvas.height = 150;
-          ctx.drawImage(img, 0, 0, 150, 150);
+          canvas.width = 120;
+          canvas.height = 120;
+          ctx.drawImage(img, 0, 0, 120, 120);
           const base64 = canvas.toDataURL("image/jpeg", 0.7);
           document.getElementById("base64Output").value = base64;
         };
@@ -263,35 +224,28 @@
 🔹 اسم الشركة: ${data.companyName}
 🔹 العمر: ${data.age}
 🔹 نوع الفحص: ${data.checkupType}
-🔹 تاريخ الفحص الطبي: ${data.checkupDate}
-🔹 تاريخ تدريب السلامة: ${data.safetyDate}
+🔹 تاريخ الفحص الطبي: ${data.checkupDate || "غير محدد"}
+🔹 تاريخ تدريب السلامة: ${data.safetyDate || "غير محدد"}
 🔹 المهنة: ${data.jobTitle}
 🔹 رقم القفل: ${data.lockNumber}
-🔹 تاريخ الانتهاء: 2025-09-01;`;
+🔹 تاريخ الانتهاء: 2027-08-01;`;
   }
 
   function generateCard(dataFromExcel = null) {
     const now = new Date();
     const expired = now >= expiryDate;
-    let data = {};
-
-    if (dataFromExcel) {
-      data = dataFromExcel;
-    } else {
-      data = {
-        name: document.getElementById("name").value.trim(),
-        workType: document.getElementById("workType").value.trim(),
-        companyName: document.getElementById("companyName").value.trim(),
-        age: document.getElementById("age").value.trim(),
-        checkupType: document.getElementById("checkupType").value.trim(),
-        checkupDate: document.getElementById("checkupDate").value.trim(),
-        safetyDate: document.getElementById("safetyDate").value.trim(),
-        jobTitle: document.getElementById("jobTitle").value.trim(),
-        lockNumber: document.getElementById("lockNumber").value.trim(),
-        imageBase64: document.getElementById("base64Output").value.trim()
-      };
-    }
-
+    let data = dataFromExcel || {
+      name: document.getElementById("name").value.trim(),
+      workType: document.getElementById("workType").value.trim(),
+      companyName: document.getElementById("companyName").value.trim(),
+      age: document.getElementById("age").value.trim(),
+      checkupType: document.getElementById("checkupType").value.trim(),
+      checkupDate: document.getElementById("checkupDate").value.trim(),
+      safetyDate: document.getElementById("safetyDate").value.trim(),
+      jobTitle: document.getElementById("jobTitle").value.trim(),
+      lockNumber: document.getElementById("lockNumber").value.trim(),
+      imageBase64: document.getElementById("base64Output").value.trim()
+    };
     if (!data.name) return alert("يرجى إدخال الاسم");
 
     const card = document.createElement("div");
@@ -301,33 +255,27 @@
     nameEl.innerText = data.name;
     card.appendChild(nameEl);
 
-    const rowDiv = document.createElement("div");
-    rowDiv.className = "row";
+    // صف الصورة والباركود جنب بعض
+    const contentRow = document.createElement("div");
+    contentRow.className = "content-row";
 
     const img = document.createElement("img");
     img.src = data.imageBase64 || "";
-    rowDiv.appendChild(img);
+    contentRow.appendChild(img);
 
     const qrDiv = document.createElement("div");
     qrDiv.className = "barcode";
-
-    const qrCanvas = document.createElement("canvas");
-
     if (!expired) {
+      const qrCanvas = document.createElement("canvas");
       const textQR = buildArabicQR(data);
-      QRCode.toCanvas(qrCanvas, textQR, { width: 150, margin: 3 }, function (error) {
-        if (error) {
-          console.error("خطأ في توليد الباركود:", error);
-          qrDiv.innerHTML = "<b style='color:red'>خطأ في توليد الباركود</b>";
-        }
+      QRCode.toCanvas(qrCanvas, textQR, { width: 120, margin: 0 }, function (error) {
+        if (error) qrDiv.innerHTML = "<b style='color:red'>خطأ</b>";
       });
       qrDiv.appendChild(qrCanvas);
-    } else {
-      qrDiv.innerHTML = "<b style='color:red'>انتهت صلاحية الباركود</b>";
-    }
+    } else { qrDiv.innerHTML = "<b style='color:red'>انتهت الصلاحية</b>"; }
 
-    rowDiv.appendChild(qrDiv);
-    card.appendChild(rowDiv);
+    contentRow.appendChild(qrDiv);
+    card.appendChild(contentRow);
 
     const btnPrint = document.createElement("button");
     btnPrint.textContent = "🖨️ طباعة";
@@ -365,12 +313,7 @@
     reader.readAsArrayBuffer(file);
   });
 
-  function printAll() {
-    window.print();
-  }
+  function printAll() { window.print(); }
 </script>
-
 </body>
 </html>
-
-
