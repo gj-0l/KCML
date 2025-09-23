@@ -21,7 +21,7 @@
     }
     .container {
       background: #fff;
-      margin: 100px;
+      margin: 120px;
       padding: 30px;
       border-radius: 20px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
@@ -31,9 +31,9 @@
     }
     .container img {
       display: block;
-      margin: 0 auto 15px;
-      width: 300px;
-      height: 300px;
+      margin: 0 auto 20px;
+      max-width: 100%;
+      height: auto;
     }
     .title {
       color:#0A6E75;
@@ -69,7 +69,7 @@
     form label { display: block; margin-top: 12px; font-weight: bold; }
     .cards-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 15px; }
 
-    /* تعديل تصميم البطاقات */
+    /* تصميم البطاقات */
     .card {
       width: 250px;
       background-color: #e6fffa;
@@ -85,11 +85,11 @@
     .card h4 { margin-bottom: 10px; color: #0A6E75; }
     .card .content-row {
       display: flex;
-      justify-content: space-around;
+      justify-content: center;
       width: 100%;
       margin-bottom: 10px;
     }
-    .card .content-row img, .card .content-row .barcode {
+    .card .content-row .barcode {
       width: 120px;
       height: 120px;
       border: 1px solid #95d5b2;
@@ -105,7 +105,7 @@
 </head>
 <body>
 <div class="container">
-  <img src="./kcml.PNG" alt="شعار الشركة">
+  <img src="kcml.PNG" alt="شعار الشركة">
   <h2 class="title">Welcome to the Digitalization World</h2>
 
   <div class="home" id="home">
@@ -255,13 +255,9 @@
     nameEl.innerText = data.name;
     card.appendChild(nameEl);
 
-    // صف الصورة والباركود جنب بعض
+    // صف الباركود فقط
     const contentRow = document.createElement("div");
     contentRow.className = "content-row";
-
-    const img = document.createElement("img");
-    img.src = data.imageBase64 || "";
-    contentRow.appendChild(img);
 
     const qrDiv = document.createElement("div");
     qrDiv.className = "barcode";
@@ -272,7 +268,9 @@
         if (error) qrDiv.innerHTML = "<b style='color:red'>خطأ</b>";
       });
       qrDiv.appendChild(qrCanvas);
-    } else { qrDiv.innerHTML = "<b style='color:red'>انتهت الصلاحية</b>"; }
+    } else {
+      qrDiv.innerHTML = "<b style='color:red'>انتهت الصلاحية</b>";
+    }
 
     contentRow.appendChild(qrDiv);
     card.appendChild(contentRow);
@@ -317,5 +315,3 @@
 </script>
 </body>
 </html>
-
-
